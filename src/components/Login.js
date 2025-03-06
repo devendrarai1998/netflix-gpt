@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidData } from "../utils/validate";
 import {
@@ -20,10 +20,6 @@ const Login = () => {
   const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
-  
-  const toggleSignInForm = () => {
-    setIsSignInForm(!isSignInForm);
-  };
 
   const handleButtonClick = () => {
     //validate the form data
@@ -82,21 +78,25 @@ const Login = () => {
     }
   };
 
+  const toggleSignInForm = () => {
+    setIsSignInForm(!isSignInForm);
+  };
+
   return (
-    <div>
+    <div className="">
       <Header />
       <div className="absolute">
         <img
+          className="h-screen w-screen object-cover"
           src={BG_URL}
           alt="Logo"
         />
       </div>
-
       <form
         onSubmit={(e) => e.preventDefault()}
-        className="w-4/12 absolute p-10  my-32 mx-auto right-0 left-0 text-white bg-black rounded-lg bg-opacity-90"
+        className="w-full md:w-4/12 absolute p-12 bg-black my-28 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-90"
       >
-        <h1 className="font-bold text-4xl py-4">
+        <h1 className="font-bold text-4xl py-2 flex justify-center">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
         {!isSignInForm && (
@@ -111,7 +111,7 @@ const Login = () => {
           ref={email}
           type="text"
           placeholder="Email or Mobile Number"
-          className="p-4 my-4 w-full bg-gray-700"
+          className="p-4 my-2 w-full bg-gray-700"
         />
         <input
           ref={password}
@@ -120,10 +120,10 @@ const Login = () => {
           className="p-4 my-4 w-full bg-gray-700"
         />
 
-        <p className="text-red-600 font-bold text-lg">{errorMessage}</p>
+        <p className="text-red-600 font-bold text-lg py-2">{errorMessage}</p>
 
         <button
-          className="p-6 my-6 bg-red-700 w-full"
+          className="p-4 my-4 bg-red-700 w-full rounded-lg"
           onClick={handleButtonClick}
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
