@@ -1,4 +1,4 @@
-import openai from "../utils/openai";
+import geminiModel from "../utils/openai";
 import { useDispatch, useSelector } from "react-redux";
 import lang from "../utils/languageConstants";
 import { useRef } from "react";
@@ -7,15 +7,16 @@ import { addGptMovieResult } from "../utils/gptSlice";
 
 const GptSearchBar = () => {
   const dispatch = useDispatch();
-  const langKey = useSelector((store) => store.config.lang);
+  const langKey = useSelector(store => store.config.lang);
   const searchText = useRef(null);
 
   //Search movies in TMDB database
   const searchMovieTMDB = async (movie) => {
-    const data = await fetch("https://api.themoviedb.org/3/search/movie?query=movies"+
-      movie
-    +"&include_adult=false&language=en-US&page=1",
-    API_OPTIONS
+    const data = await fetch(
+      `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
+        movie
+      )}&include_adult=false&language=en-US&page=1`,
+      API_OPTIONS
     );
 
     const json = await data.json();
@@ -23,30 +24,32 @@ const GptSearchBar = () => {
   };
 
   const handleGptSearchClick = async () => {
-    //console.log(searchText.current.value);
 
     const gptQuery =
       "Act as a Movie Recommendation system and suggest some movies for the query : " +
       searchText.current.value +
-      ". only give me names of 5 movies, comma seperated like the example result given ahead. Example Result: Gadar, Sholay, Don, Golmaal, Koi Mil Gaya";
+      ". only give me names of 5 movies, comma separated like the example result given ahead. Example Result: Gadar, Sholay, Don, Golmaal, Koi Mil Gaya";
 
-    const gptResults = await openai.chat.completions.create({
-      messages: [{ role: "user", content: gptQuery }],
-      model: "gpt-3.5-turbo",
-    });
-
-    if(!gptResults.choices){
-      //Error: write error handling code
+    
+    const result = await geminiModel.generateContent(gptQuery);
+    const gptResult = result.response.text();
+    
+    if (!gptResult) {
+      console.error("Gemini API response is empty.");
+      return;
     }
-    // console.log(gptResults.choices?.[0]?.message?.content);
 
-    const gptMovies = gptResults.choices?.[0]?.message?.content.split(",");
+    const movieList = gptResult.split(",");
+   
 
-    const promiseArray = gptMovies.map((movie) => searchMovieTMDB(movie)); 
+    const promiseArray = movieList.map(movie => searchMovieTMDB(movie));
+    
     const tmdbResults = await Promise.all(promiseArray);
-    //console.log(tmdbResults);
+   
 
-    dispatch(addGptMovieResult({ MovieNames: gptMovies, movieResults: tmdbResults }));
+    dispatch(
+      addGptMovieResult({ movieNames: movieList, movieResults: tmdbResults })
+    );
   };
 
   return (
